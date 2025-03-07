@@ -18,11 +18,11 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final com.flightapp.security.JwtTokenProvider tokenProvider;
+    private final JwtTokenProvider tokenProvider;
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtConfig jwtConfig;
 
-    public JwtAuthenticationFilter(com.flightapp.security.JwtTokenProvider tokenProvider,
+    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider,
                                    UserDetailsServiceImpl userDetailsService,
                                    JwtConfig jwtConfig) {
         this.tokenProvider = tokenProvider;
