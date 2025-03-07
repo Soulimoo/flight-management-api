@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
         ),
         servers = {
                 @Server(
-                        url = "/api",
+                        url = "/flightapp",
                         description = "Development Server"
                 ),
                 @Server(
