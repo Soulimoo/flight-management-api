@@ -5,6 +5,7 @@ import com.flightapp.exception.ResourceNotFoundException;
 import com.flightapp.model.Flight;
 import com.flightapp.repository.FlightRepository;
 import com.flightapp.service.FlightService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class FlightServiceImpl implements FlightService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public FlightDto addFlight(FlightDto flightDto) {
         Flight flight = convertToEntity(flightDto);
         Flight savedFlight = flightRepository.save(flight);
@@ -27,6 +29,7 @@ public class FlightServiceImpl implements FlightService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public FlightDto getFlightById(Long id) {
         Flight flight = flightRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Flight", "id", id));
@@ -34,6 +37,7 @@ public class FlightServiceImpl implements FlightService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public List<FlightDto> getAllFlights() {
         List<Flight> flights = flightRepository.findAll();
         return flights.stream()
@@ -42,6 +46,7 @@ public class FlightServiceImpl implements FlightService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteFlight(Long id) {
         Flight flight = flightRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Flight", "id", id));

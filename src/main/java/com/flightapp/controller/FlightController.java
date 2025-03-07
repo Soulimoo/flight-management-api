@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,8 +48,12 @@ public class FlightController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Flight details",
                     content = @Content(schema = @Schema(implementation = FlightDto.class)))
             FlightDto flightDto) {
-        FlightDto savedFlight = flightService.addFlight(flightDto);
-        return new ResponseEntity<>(savedFlight, HttpStatus.CREATED);
+        try {
+            FlightDto savedFlight = flightService.addFlight(flightDto);
+            return new ResponseEntity<>(savedFlight, HttpStatus.CREATED);
+        } catch (AccessDeniedException e) {
+            throw e; // Re-throw for consistent handling by global exception handler
+        }
     }
 
     @GetMapping("/{id}")
@@ -94,7 +99,18 @@ public class FlightController {
     public ResponseEntity<Void> deleteFlight(
             @Parameter(description = "ID of the flight to delete", required = true)
             @PathVariable Long id) {
-        flightService.deleteFlight(id);
-        return ResponseEntity.noContent().build();
+        try {
+            flightService.deleteFlight(id);
+            return ResponseEntity.noContent().build();
+        } catch (AccessDeniedException e) {
+            throw e; // Re-throw for consistent handling by global exception handler
+        }
+    }
+
+    // Special endpoint for admin access testing
+    @GetMapping("/{id}/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> adminOnlyEndpoint(@PathVariable Long id) {
+        return ResponseEntity.ok("Admin access successful");
     }
 }

@@ -9,18 +9,19 @@ A secure REST API for managing flight information with JWT-based authentication 
 - Role-based access control (Admin vs User)
 - Comprehensive input validation
 - Exception handling
-- Unit tests
+- Extensive unit and integration tests
 - API documentation with Swagger/OpenAPI
 
 ## Technologies
 
 - Spring Boot 3.2.3
-- Spring Security
+- Spring Security with JWT
 - Spring Data JPA
-- H2 Database
+- Oracle Database (production) / H2 Database (tests)
 - JWT (JSON Web Tokens)
 - Swagger/OpenAPI 3.0
 - Maven
+- JUnit 5 & Mockito for testing
 
 ## Project Structure
 
@@ -33,19 +34,20 @@ The application follows a standard layered architecture:
 - **Model Layer**: Entity definitions
 - **DTO Layer**: Data transfer objects
 - **Exception Handling**: Custom exceptions and global handler
+- **Test Layer**: Unit and integration tests for all components
 
 ## API Endpoints
 
 ### Authentication
 
-- `POST /api/auth/login` - Authenticate and get JWT token
+- `POST /auth/login` - Authenticate and get JWT token
 
 ### Flight Management
 
-- `POST /api/flights` - Add a new flight (Admin only)
-- `GET /api/flights/{id}` - Get a flight by ID (Authenticated users)
-- `GET /api/flights` - List all flights (Authenticated users)
-- `DELETE /api/flights/{id}` - Delete a flight (Admin only)
+- `POST /flights` - Add a new flight (Admin only)
+- `GET /flights/{id}` - Get a flight by ID (Authenticated users)
+- `GET /flights` - List all flights (Authenticated users)
+- `DELETE /flights/{id}` - Delete a flight (Admin only)
 
 ## Getting Started
 
@@ -53,6 +55,7 @@ The application follows a standard layered architecture:
 
 - Java 17 or higher
 - Maven
+- Oracle Database (can be replaced with H2 for development)
 
 ### Running the Application
 
@@ -64,8 +67,8 @@ The application follows a standard layered architecture:
 mvn spring-boot:run
 ```
 
-The API will be available at http://localhost:8080/api
-The Swagger UI will be available at http://localhost:8080/api/swagger-ui.html
+The API will be available at http://localhost:8080/flightapp
+The Swagger UI will be available at http://localhost:8080/flightapp/swagger-ui.html
 
 ### Using the API
 
@@ -73,7 +76,7 @@ You can interact with the API in two ways:
 
 1. **Using Swagger UI**
    
-   Navigate to http://localhost:8080/api/swagger-ui.html to access the Swagger UI interface.
+   Navigate to http://localhost:8080/flightapp/swagger-ui.html to access the Swagger UI interface.
    - This provides interactive documentation for all endpoints
    - You can test all API endpoints directly from the browser
    - To use authenticated endpoints, first execute the login endpoint to get a token, then click the "Authorize" button and enter `Bearer YOUR_JWT_TOKEN`
@@ -83,9 +86,9 @@ You can interact with the API in two ways:
    Use the following curl command to authenticate:
 
    ```bash
-   curl -X POST http://localhost:8080/api/auth/login \
+   curl -X POST http://localhost:8080/flightapp/auth/login \
      -H "Content-Type: application/json" \
-     -d '{"username":"admin","password":"password"}'
+     -d '{"username":"admin","password":"123"}'
    ```
 
    Response:
@@ -97,10 +100,10 @@ You can interact with the API in two ways:
    }
    ```
 
-2. **Creating a Flight (Admin only)**
+3. **Creating a Flight (Admin only)**
 
    ```bash
-   curl -X POST http://localhost:8080/api/flights \
+   curl -X POST http://localhost:8080/flightapp/flights \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer YOUR_JWT_TOKEN" \
      -d '{
@@ -112,24 +115,24 @@ You can interact with the API in two ways:
      }'
    ```
 
-3. **Getting a Flight**
+4. **Getting a Flight**
 
    ```bash
-   curl -X GET http://localhost:8080/api/flights/1 \
+   curl -X GET http://localhost:8080/flightapp/flights/1 \
      -H "Authorization: Bearer YOUR_JWT_TOKEN"
    ```
 
-4. **Getting All Flights**
+5. **Getting All Flights**
 
    ```bash
-   curl -X GET http://localhost:8080/api/flights \
+   curl -X GET http://localhost:8080/flightapp/flights \
      -H "Authorization: Bearer YOUR_JWT_TOKEN"
    ```
 
-5. **Deleting a Flight (Admin only)**
+6. **Deleting a Flight (Admin only)**
 
    ```bash
-   curl -X DELETE http://localhost:8080/api/flights/1 \
+   curl -X DELETE http://localhost:8080/flightapp/flights/1 \
      -H "Authorization: Bearer YOUR_JWT_TOKEN"
    ```
 
@@ -139,23 +142,51 @@ The application comes with two pre-configured users:
 
 1. **Admin User**
    - Username: `admin`
-   - Password: `password`
+   - Password: `123`
    - Role: `ADMIN`
 
 2. **Regular User**
    - Username: `user`
-   - Password: `password`
+   - Password: `123`
    - Role: `USER`
 
-## Database Console
+## Database 
 
-You can access the H2 database console at http://localhost:8080/api/h2-console with the following details:
+### Oracle Database (Production)
+The application uses Oracle as its primary database:
 
-- JDBC URL: `jdbc:h2:mem:flightdb`
+- Database: Oracle XE
+- Username: C##AIRLINEFLIGHT
+- Password: airline123
+
+### H2 Database (Testing)
+For testing purposes, the application switches to an in-memory H2 database:
+
+- JDBC URL: `jdbc:h2:mem:testdb`
 - Username: `sa`
-- Password: `password`
+- Password: `` (empty)
 
 ## Testing
+
+The application includes comprehensive tests covering all layers of the architecture:
+
+### Test Structure
+
+- **Controller Tests**: Verify HTTP endpoints, request validation, and authentication
+- **Service Tests**: Verify business logic and service-level authorization
+- **Repository Tests**: Verify data access operations
+- **Security Tests**: Verify authentication and role-based access control
+- **Integration Tests**: Verify end-to-end functionality
+
+### Security Testing Features
+
+- TestSecurityConfig: Configures security for the test environment
+- TestMethodSecurityConfig: Ensures method-level security annotations work in tests
+- WithMockUser annotations: Simulates authenticated users with specific roles
+- CSRF token handling in tests
+- Proper validation of authorization failures (403 Forbidden responses)
+
+### Running the Tests
 
 To run the tests:
 
@@ -168,7 +199,10 @@ mvn test
 - JWT tokens expire after 1 hour (configurable in application.properties)
 - Passwords are stored as BCrypt hashes
 - API endpoints are secured with role-based authorization
+- Method-level security with @PreAuthorize annotations for fine-grained access control
+- CSRF protection enabled for production (disabled for testing)
 - REST principles are followed for API design
+- Comprehensive exception handling for security violations
 
 ## Extending the Application
 
@@ -179,3 +213,5 @@ You can extend this application by:
 3. Adding more detailed flight information (aircraft, crew, etc.)
 4. Implementing booking functionality
 5. Adding pagination and sorting for flight listings
+6. Enhancing security with refresh tokens
+7. Adding additional role types (e.g., MANAGER, OPERATOR)
