@@ -9,7 +9,7 @@ A secure REST API for managing flight information with JWT-based authentication 
 - Role-based access control (Admin vs User)
 - Comprehensive input validation
 - Exception handling
-- Extensive unit and integration tests
+- Robust unit and controller tests
 - API documentation with Swagger/OpenAPI
 
 ## Technologies
@@ -34,7 +34,7 @@ The application follows a standard layered architecture:
 - **Model Layer**: Entity definitions
 - **DTO Layer**: Data transfer objects
 - **Exception Handling**: Custom exceptions and global handler
-- **Test Layer**: Unit and integration tests for all components
+- **Test Layer**: Unit tests, controller tests, and security tests
 
 ## API Endpoints
 
@@ -168,15 +168,25 @@ For testing purposes, the application switches to an in-memory H2 database:
 
 ## Testing
 
-The application includes comprehensive tests covering all layers of the architecture:
+The application includes comprehensive tests covering different components:
 
 ### Test Structure
 
-- **Controller Tests**: Verify HTTP endpoints, request validation, and authentication
-- **Service Tests**: Verify business logic and service-level authorization
-- **Repository Tests**: Verify data access operations
-- **Security Tests**: Verify authentication and role-based access control
-- **Integration Tests**: Verify end-to-end functionality
+- **Controller Tests**: Tests that validate controller endpoints using MockMvc and mocked services
+- **Service Unit Tests**: Tests for service layer business logic
+- **Security Configuration Tests**: Tests that validate security rules and permissions
+- **Component Unit Tests**: Tests for individual components like JwtTokenProvider
+
+### Testing Approach
+
+Our testing approach focuses on:
+
+- Testing controller endpoints with Spring's `@WebMvcTest`
+- Mocking services with Mockito to isolate controller behavior
+- Using `@WithMockUser` to simulate authenticated users with specific roles
+- Validating role-based access control at controller level
+- Testing security configuration with `@SpringBootTest`
+- Testing JWT token generation and validation
 
 ### Security Testing Features
 
@@ -203,15 +213,3 @@ mvn test
 - CSRF protection enabled for production (disabled for testing)
 - REST principles are followed for API design
 - Comprehensive exception handling for security violations
-
-## Extending the Application
-
-You can extend this application by:
-
-1. Adding user registration functionality
-2. Implementing flight search by various criteria
-3. Adding more detailed flight information (aircraft, crew, etc.)
-4. Implementing booking functionality
-5. Adding pagination and sorting for flight listings
-6. Enhancing security with refresh tokens
-7. Adding additional role types (e.g., MANAGER, OPERATOR)
